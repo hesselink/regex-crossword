@@ -18,3 +18,16 @@ data Regex =
 
 lit :: Char -> Regex
 lit = Literal . Token
+
+ppr :: Regex -> String
+ppr (Literal (Token c)) = [c]
+ppr Any = "."
+ppr (OneOf toks) = "[" ++ map unToken toks ++ "]"
+ppr (NoneOf toks) = "[^" ++ map unToken toks ++ "]"
+ppr (Many r) = ppr r ++ "*"
+ppr (Many1 r) = ppr r ++ "+"
+ppr (Seq r1 r2) = ppr r1 ++ ppr r2
+ppr (Group r) = "(" ++ ppr r ++ ")"
+ppr (BackRef i) = "\\" ++ show i
+ppr (Choice r1 r2) = ppr r1 ++ "|" ++ ppr r2
+ppr (Option r) = ppr r ++ "?"
