@@ -18,8 +18,12 @@ import Crossword.Token
 -- string = pToken
 -- sepBy1 = flip pList1Sep
 
+type Parser = Parsec String ()
+
+regex :: Parser Regex
 regex = choices <$> sepBy1 regex' (char '|')
 
+regex' :: Parser Regex
 regex' = seq <$> some (withModifier $
    (  literal
   <|> any
@@ -29,11 +33,15 @@ regex' = seq <$> some (withModifier $
    )
   )
 
+withModifier :: Parser Regex -> Parser Regex
 withModifier p = p <**> (option id modifier)
 
+modifier :: Parser (Regex -> Regex)
 modifier =  Many   <$ char '*'
         <|> Many1  <$ char '+'
         <|> Option <$ char '?'
+
+literal, any, oneOf, noneOf, oneOrNone, many_, many1_, group, backRef, choice :: Parser Regex
 
 literal = Literal . Token <$> upper
 
