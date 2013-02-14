@@ -56,8 +56,6 @@ backRef = BackRef . read . pure <$ char '\\' <*> digit
 
 choice = choices <$ char '(' <*> sepBy1 regex (char '|') <* char ')'
 
--- option = Option <$> regex <* char '?'
-
 seq = foldr1 Seq
 
 choices = foldr1 Choice
