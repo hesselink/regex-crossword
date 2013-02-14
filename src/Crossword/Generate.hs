@@ -20,7 +20,11 @@ generate l r = filter ((== l) . length)
 
 generate' :: Regex -> StateT (GenState String) [] String
 generate' (Literal t) = genToken t
-generate' Any = list enumAll >>= genToken
+generate' Any =
+  do l <- gets availableLength
+     guard (l > 0)
+     x <- list enumAll
+     genTokenUnsafe x
 generate' (OneOf toks) = list toks >>= genToken
 generate' (NoneOf toks) = list (enumAll \\ toks) >>= genToken
 generate' (Many r) = return "" `mplus`
@@ -55,3 +59,6 @@ genToken (Token c) =
      puts availableLength (l - 1)
      return [c]
 
+genTokenUnsafe (Token c) =
+  do modify availableLength (subtract 1)
+     return [c]
