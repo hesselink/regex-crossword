@@ -4,7 +4,6 @@ module Crossword.Parser where
 import Prelude hiding (any, seq)
 
 import Control.Applicative
-import Data.Maybe
 import Text.Parsec hiding (oneOf, noneOf, (<|>), choice)
 -- import Data.Char
 -- import Text.ParserCombinators.UU hiding (Seq)
