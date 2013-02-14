@@ -55,7 +55,3 @@ group = Group <$ char '(' <*> regex <* char ')'
 backRef = BackRef . read . pure <$ char '\\' <*> digit
 
 choice = choices <$ char '(' <*> sepBy1 regex (char '|') <* char ')'
-
-seq = foldr1 Seq
-
-choices = foldr1 Choice

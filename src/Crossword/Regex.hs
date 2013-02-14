@@ -31,3 +31,8 @@ ppr (Group r) = "(" ++ ppr r ++ ")"
 ppr (BackRef i) = "\\" ++ show i
 ppr (Choice r1 r2) = ppr r1 ++ "|" ++ ppr r2
 ppr (Option r) = ppr r ++ "?"
+
+seq, choices :: [Regex] -> Regex
+seq = foldr1 Seq
+
+choices = foldr1 Choice
