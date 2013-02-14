@@ -11,6 +11,7 @@ import Text.Parsec hiding (oneOf, noneOf, (<|>), choice)
 -- import Text.ParserCombinators.UU.BasicInstances
 
 import Crossword.Regex
+import Crossword.Token
 
 -- char = pSym
 -- upper = pSatisfy isUpper (Insertion "" '#' maxBound)

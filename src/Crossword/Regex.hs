@@ -1,14 +1,6 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Crossword.Regex where
 
-newtype Token = Token { unToken :: Char } deriving (Show, Eq, Enum)
-
-instance Bounded Token where
-  minBound = Token 'A'
-  maxBound = Token 'Z'
-
-enumAll :: (Bounded a, Enum a) => [a]
-enumAll = [minBound .. maxBound]
+import Crossword.Token
 
 data Regex =
     Literal Token

@@ -12,6 +12,7 @@ import qualified Data.IntMap as M
 
 import Crossword.GenState
 import Crossword.Regex
+import Crossword.Token
 
 generate :: Int -> Regex -> [String]
 generate l r = filter ((== l) . length)
