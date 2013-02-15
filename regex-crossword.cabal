@@ -24,3 +24,10 @@ library
                        Crossword.Expand
                        Crossword.FixedRegex
   ghc-options:         -Wall
+
+executable regex-crossword-solver
+  build-depends:       base   == 4.5.*
+                     , parsec == 3.1.*
+                     , regex-crossword
+  hs-source-dirs:      solver
+  main-is:             Main.hs
