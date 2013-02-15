@@ -1,14 +1,11 @@
 {-# LANGUAGE TupleSections #-}
 module Crossword.Generate where
 
-import Control.Applicative
 import Control.Monad.State (StateT (..))
 import Control.Monad
 import Data.Label.PureM
-import Data.Maybe (maybeToList)
 import Data.Set ((\\))
 
-import qualified Data.IntMap as M
 import qualified Data.Set    as Set
 
 import Crossword.GenState
@@ -61,6 +58,7 @@ genToken (Token c) =
      puts availableLength (l - 1)
      return [c]
 
+genTokenUnsafe :: Token -> StateT (GenState String) [] String
 genTokenUnsafe (Token c) =
   do modify availableLength (subtract 1)
      return [c]
