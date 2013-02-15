@@ -20,7 +20,7 @@ data GenState a = GenState
 mkLabel ''GenState
 
 emptyState :: Int -> GenState a
-emptyState l = GenState l 0 M.empty
+emptyState l = GenState l 1 M.empty
 
 storeGroup :: a -> StateT (GenState a) [] ()
 storeGroup s =
