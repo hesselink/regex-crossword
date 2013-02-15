@@ -12,7 +12,7 @@ data Atom =
   | Literal Token
   | OneOf (Set Token)
   | NoneOf (Set Token)
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Show)
 
 ppr :: FixedRegex -> String
 ppr = concatMap pprAtom
@@ -30,15 +30,18 @@ merge :: FixedRegex -> FixedRegex -> FixedRegex
 merge = zipWith mergeAtom
 
 mergeAtom :: Atom -> Atom -> Atom
-mergeAtom a     b     | a > b = mergeAtom b a
-mergeAtom Any   _     = Any
+mergeAtom Any            _            = Any
+mergeAtom _              Any          = Any
 mergeAtom l@(Literal t1) (Literal t2) | t1 == t2  = l
                                       | otherwise = OneOf (Set.fromList [t1, t2])
-mergeAtom (Literal t1) (OneOf ts)  = OneOf (Set.insert t1 ts)
-mergeAtom (Literal t)  (NoneOf ts) = noneOf (Set.delete t ts)
-mergeAtom (OneOf ts1) (OneOf ts2) = OneOf (Set.union ts1 ts2)
-mergeAtom (OneOf ts1) (NoneOf ts2) = noneOf (ts2 \\ ts1)
-mergeAtom (NoneOf ts1) (NoneOf ts2) = noneOf (Set.intersection ts1 ts2)
+mergeAtom (Literal t)    (OneOf ts)   = OneOf (Set.insert t ts)
+mergeAtom (Literal t)    (NoneOf ts)  = noneOf (Set.delete t ts)
+mergeAtom (OneOf ts)     (Literal t)  = OneOf (Set.insert t ts)
+mergeAtom (OneOf ts1)    (OneOf ts2)  = OneOf (Set.union ts1 ts2)
+mergeAtom (OneOf ts1)    (NoneOf ts2) = noneOf (ts2 \\ ts1)
+mergeAtom (NoneOf ts1)   (NoneOf ts2) = noneOf (Set.intersection ts1 ts2)
+mergeAtom (NoneOf ts)    (Literal t)  = noneOf (Set.delete t ts)
+mergeAtom (NoneOf ts2)   (OneOf ts1)  = noneOf (ts2 \\ ts1)
 
 noneOf :: Set Token -> Atom
 noneOf ts =
