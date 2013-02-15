@@ -5,10 +5,11 @@ import Control.Applicative
 import Control.Monad.State (StateT (..))
 import Control.Monad
 import Data.Label.PureM
-import Data.List ((\\))
 import Data.Maybe (maybeToList)
+import Data.Set ((\\))
 
 import qualified Data.IntMap as M
+import qualified Data.Set    as Set
 
 import Crossword.GenState
 import Crossword.Regex
@@ -26,8 +27,8 @@ generate' Any =
      guard (l > 0)
      x <- list enumAll
      genTokenUnsafe x
-generate' (OneOf toks) = list toks >>= genToken
-generate' (NoneOf toks) = list (enumAll \\ toks) >>= genToken
+generate' (OneOf toks) = set toks >>= genToken
+generate' (NoneOf toks) = set (Set.fromList enumAll \\ toks) >>= genToken
 generate' (Many r) = return "" `mplus`
   do x <- generate' r
      xs <- generate' (Many r)

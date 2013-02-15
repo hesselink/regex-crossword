@@ -6,8 +6,10 @@ import Data.IntMap (IntMap)
 import Data.Label (mkLabel)
 import Data.Label.PureM
 import Data.Maybe (maybeToList)
+import Data.Set (Set)
 
 import qualified Data.IntMap as M
+import qualified Data.Set    as Set
 
 data GenState a = GenState
   { _availableLength :: !Int
@@ -33,3 +35,6 @@ getGroup g =
 
 list :: [a] -> StateT s [] a
 list xs = StateT (\s -> map (,s) xs)
+
+set :: Set a -> StateT s [] a
+set xs = StateT (\s -> map (,s) (Set.toList xs))
