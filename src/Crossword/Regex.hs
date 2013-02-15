@@ -1,12 +1,16 @@
 module Crossword.Regex where
 
+import Data.Set (Set)
+
+import qualified Data.Set as Set
+
 import Crossword.Token
 
 data Regex =
     Literal Token
   | Any
-  | OneOf [Token]
-  | NoneOf [Token]
+  | OneOf (Set Token)
+  | NoneOf (Set Token)
   | Many Regex
   | Many1 Regex
   | Seq Regex Regex
@@ -22,8 +26,8 @@ lit = Literal . Token
 ppr :: Regex -> String
 ppr (Literal (Token c)) = [c]
 ppr Any = "."
-ppr (OneOf toks) = "[" ++ map unToken toks ++ "]"
-ppr (NoneOf toks) = "[^" ++ map unToken toks ++ "]"
+ppr (OneOf toks) = "[" ++ map unToken (Set.toList toks) ++ "]"
+ppr (NoneOf toks) = "[^" ++ map unToken (Set.toList toks) ++ "]"
 ppr (Many r) = ppr r ++ "*"
 ppr (Many1 r) = ppr r ++ "+"
 ppr (Seq r1 r2) = ppr r1 ++ ppr r2

@@ -9,6 +9,8 @@ import Text.Parsec hiding (oneOf, noneOf, (<|>), choice)
 -- import Text.ParserCombinators.UU hiding (Seq)
 -- import Text.ParserCombinators.UU.BasicInstances
 
+import qualified Data.Set as Set
+
 import Crossword.Regex
 import Crossword.Token
 
@@ -47,9 +49,9 @@ literal = Literal . Token <$> upper
 
 any = Any <$ char '.'
 
-oneOf = OneOf . map Token <$> some upper <* char ']'
+oneOf = OneOf . Set.fromList . map Token <$> some upper <* char ']'
 
-noneOf = NoneOf . map Token <$ char '^' <*> some upper <* char ']'
+noneOf = NoneOf . Set.fromList . map Token <$ char '^' <*> some upper <* char ']'
 
 oneOrNone = char '[' *> (oneOf <|> noneOf)
 
