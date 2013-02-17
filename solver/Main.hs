@@ -1,20 +1,15 @@
 module Main where
 
-import Control.Arrow
+import Data.Label
 import Text.Parsec (parse)
 
-import Crossword.Expand
-import Crossword.FixedRegex
-import Crossword.Parser
+import Crossword.Description
+import Crossword.Puzzle
 
-main = readFile "data/puzzle" >>=
-    print
-  . map ( ppr
-        . merges
-        . uncurry expand
-        . (read *** (either (error . show) id . parse regex ""))
-        . (\[x,y] -> (x,y))
-        . words
-        )
-  . filter (/= "")
-  . lines
+main :: IO ()
+main =
+  do f <- readFile "data/puzzle"
+     let (Right descr) = parse description "" f
+         pzl = initialize descr
+         sol = solve pzl
+     putStrLn (showBoard (get board sol))
