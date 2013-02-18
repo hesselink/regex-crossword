@@ -2,7 +2,6 @@
 module Crossword.Puzzle where
 
 import Control.Arrow
-import Control.Newtype
 import Data.Foldable (Foldable, foldMap)
 import Data.Function
 import Data.List (intercalate, groupBy, sortBy)
@@ -101,5 +100,5 @@ showRow = go 0
 equating :: Eq b => (a -> b) -> a -> a -> Bool
 equating = on (==)
 
-foldMapEndo :: (Functor f, Foldable f) => (a -> b -> b) -> f a -> b -> b
-foldMapEndo f = ala Endo foldMap . fmap f
+foldMapEndo :: (Foldable f) => (a -> b -> b) -> f a -> b -> b
+foldMapEndo f = appEndo . foldMap (Endo . f)
