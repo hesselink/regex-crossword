@@ -17,10 +17,10 @@ generate l r = filter ((== l) . length)
              . map fst
              $ runStateT (generate' r) (emptyState l)
 
-generate' :: Regex -> StateT (GenState String) [] String
+generate' :: Regex -> StateT (GenState Int String) [] String
 generate' (Literal t) = genToken t
 generate' Any =
-  do l <- gets availableLength
+  do l <- gets state
      guard (l > 0)
      x <- list enumAll
      genTokenUnsafe x
@@ -43,22 +43,22 @@ generate' (Group r) =
      storeGroup x
      return x
 generate' (BackRef i) =
-  do l <- gets availableLength
+  do l <- gets state
      x <- getGroup i
      guard (l >= length x)
-     modify availableLength (subtract (length x))
+     modify state (subtract (length x))
      return x
 generate' (Choice r1 r2) = generate' r1 `mplus` generate' r2
 generate' (Option r) = return "" `mplus` generate' r
 
-genToken :: Token -> StateT (GenState String) [] String
+genToken :: Token -> StateT (GenState Int String) [] String
 genToken (Token c) =
-  do l <- gets availableLength
+  do l <- gets state
      guard (l > 0)
-     puts availableLength (l - 1)
+     puts state (l - 1)
      return [c]
 
-genTokenUnsafe :: Token -> StateT (GenState String) [] String
+genTokenUnsafe :: Token -> StateT (GenState Int String) [] String
 genTokenUnsafe (Token c) =
-  do modify availableLength (subtract 1)
+  do modify state (subtract 1)
      return [c]
