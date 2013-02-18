@@ -15,9 +15,10 @@ import Data.Tuple
 
 import qualified Data.Map as Map
 
+import Crossword.Description (Description, Position, Length, Clue)
 import Crossword.Expand
 import Crossword.FixedRegex
-import Crossword.Description (Description, Position, Length, Clue)
+import Crossword.Regex (Regex)
 
 import qualified Crossword.Description as D
 
@@ -25,9 +26,9 @@ type Board = Map Position Atom
 
 data Puzzle = Puzzle
   { _board      :: Board
-  , _horizontal :: [Clue [FixedRegex]]
-  , _vertical   :: [Clue [FixedRegex]]
-  , _diagonal   :: [Clue [FixedRegex]]
+  , _horizontal :: [Clue Regex]
+  , _vertical   :: [Clue Regex]
+  , _diagonal   :: [Clue Regex]
   } deriving Show
 
 mkLabel ''Puzzle
@@ -38,9 +39,7 @@ initialize descr =
       setRowToAny = foldMapEndo (flip Map.insert Any)
       horizontalRows = map (uncurry (row Horizontal) . (D.position &&& D.len)) . D.horizontal
       initialBoard = (foldMapEndo setRowToAny . horizontalRows $ descr) Map.empty
-      expandClue c = c { D.clue = expand (D.len c) (D.clue c) }
-      expanded direction = map expandClue . direction $ descr
-  in Puzzle initialBoard (expanded D.horizontal) (expanded D.vertical) (expanded D.diagonal)
+  in Puzzle initialBoard (D.horizontal descr) (D.vertical descr) (D.diagonal descr)
 
 solve :: Puzzle -> Puzzle
 solve p =
@@ -59,19 +58,17 @@ data Direction = Horizontal | Vertical | Diagonal
 stepClues :: Direction -> Puzzle -> Puzzle
 stepClues dir pzl = foldMapEndo (stepClue dir) (get (label dir) pzl) pzl
 
-stepClue :: Direction -> Clue [FixedRegex] -> Puzzle -> Puzzle
-stepClue dir c pzl = modify (label dir) (updateClue (c { D.clue = newOpts }))
-                   . modify board updateBoard
+stepClue :: Direction -> Clue Regex -> Puzzle -> Puzzle
+stepClue dir c pzl = modify board updateBoard
                    $ pzl
   where
     updateBoard = foldMapEndo (uncurry (Map.insertWith (\x -> fromJust . intersectAtom x))) $ zip poss newRow
     newRow = merges newOpts
-    isPossible = isJust . intersect curRow
-    newOpts = filter isPossible (D.clue c)
+    newOpts = expand curRow (D.clue c)
     poss = row dir (D.position c) (D.len c)
     curRow = map (fromJust . flip Map.lookup (get board pzl)) poss
 
-label :: Direction -> Puzzle :-> [Clue [FixedRegex]]
+label :: Direction -> Puzzle :-> [Clue Regex]
 label Horizontal = horizontal
 label Vertical   = vertical
 label Diagonal   = diagonal

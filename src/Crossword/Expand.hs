@@ -11,12 +11,12 @@ import Crossword.GenState
 import Crossword.Regex
 import qualified Crossword.FixedRegex as F
 
-expand :: Int -> Regex -> [FixedRegex]
-expand l r = filter ((== l) . length)
+expand :: FixedRegex -> Regex -> [FixedRegex]
+expand pat r = filter ((== (length pat)) . length)
              . map fst
-             $ runStateT (expand' r) (emptyState l)
+             $ runStateT (expand' r) (emptyState pat)
 
-expand' :: Regex -> StateT (GenState FixedRegex) [] FixedRegex
+expand' :: Regex -> StateT (GenState FixedRegex FixedRegex) [] FixedRegex
 expand' (Literal t) = fixed (F.Literal t)
 expand' Any     {}  = fixed F.Any
 expand' (OneOf ts)  = fixed (F.OneOf ts)
@@ -34,18 +34,29 @@ expand' (Group r)   =
   do x <- expand' r
      storeGroup x
      return x
+-- TODO: this doesn't propagate information backwards: if you have
+-- somelike like '.\1', and pass in '.A' as a pattern, it will
+-- generate '.A', not 'AA'.
 expand' (BackRef i)   =
-  do l <- gets availableLength
-     x <- getGroup i
-     guard (l >= length x)
-     modify availableLength (subtract (length x))
-     return x
+  do g  <- getGroup i
+     as <- replicateM (length g) popAtom
+     let mr = F.intersect as g
+     maybe mzero return mr
+
 expand' (Choice r1 r2) = expand' r1 `mplus` expand' r2
 expand' (Option r)    = return mempty `mplus` expand' r
 
-fixed :: Atom -> StateT (GenState a) [] FixedRegex
+fixed :: Atom -> StateT (GenState FixedRegex a) [] FixedRegex
 fixed r =
-  do l <- gets availableLength
-     guard (l > 0)
-     puts availableLength (l - 1)
-     return [r]
+  do a <- popAtom
+     let ma = F.intersectAtom a r
+     maybe mzero (return . (:[])) ma
+
+popAtom :: StateT (GenState FixedRegex a) [] Atom
+popAtom =
+  do as <- gets state
+     case as of
+       []      -> mzero
+       (a:as') ->
+         do puts state as'
+            return a
