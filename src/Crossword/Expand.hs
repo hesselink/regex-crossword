@@ -1,10 +1,17 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Crossword.Expand where
 
+import Control.Applicative
+import Control.Arrow
 import Control.Monad
 import Control.Monad.State (StateT (..))
+import Data.IntMap (IntMap)
+import Data.Label
 import Data.Label.PureM
+import Data.Maybe
 import Data.Monoid (Monoid (..), (<>))
+
+import qualified Data.IntMap as Map
 
 import Crossword.FixedRegex (FixedRegex, Atom)
 import Crossword.GenState
@@ -13,10 +20,18 @@ import qualified Crossword.FixedRegex as F
 
 expand :: FixedRegex -> Regex -> [FixedRegex]
 expand pat r = filter ((== (length pat)) . length)
-             . map fst
+             . map (uncurry replaceGroups . second (get groups))
              $ runStateT (expand' r) (emptyState pat)
 
-expand' :: Regex -> StateT (GenState FixedRegex FixedRegex) [] FixedRegex
+data Item = Item Atom | Ref Int
+
+replaceGroups :: [Item] -> IntMap [Item] -> FixedRegex
+replaceGroups is grps = concatMap replaceSingle is
+  where
+    replaceSingle (Item a) = [a]
+    replaceSingle (Ref  i) = replaceGroups (fromJust (Map.lookup i grps)) grps
+
+expand' :: Regex -> StateT (GenState FixedRegex [Item]) [] [Item]
 expand' (Literal t) = fixed (F.Literal t)
 expand' Any     {}  = fixed F.Any
 expand' (OneOf ts)  = fixed (F.OneOf ts)
@@ -32,29 +47,35 @@ expand' (Seq r1 r2)   =
      return (x <> y)
 expand' (Group r)   =
   do x <- expand' r
-     storeGroup x
-     return x
--- TODO: this doesn't propagate information backwards: if you have
--- somelike like '.\1', and pass in '.A' as a pattern, it will
--- generate '.A', not 'AA'.
+     i <- storeGroup x
+     return [Ref i]
 expand' (BackRef i)   =
   do g  <- getGroup i
      as <- replicateM (length g) popAtom
-     let mr = F.intersect as g
+     let mr = intersectItems (map Item as) g
      case mr of
        Nothing -> mzero
        Just r  ->
          do updateGroup i r
-            return r
-
+            return [Ref i]
 expand' (Choice r1 r2) = expand' r1 `mplus` expand' r2
 expand' (Option r)    = return mempty `mplus` expand' r
 
-fixed :: Atom -> StateT (GenState FixedRegex a) [] FixedRegex
+intersectItems :: [Item] -> [Item] -> Maybe [Item]
+intersectItems = zipWithM intersectItem
+
+intersectItem :: Item -> Item -> Maybe Item
+intersectItem (Item a1) (Item a2) = Item <$> F.intersectAtom a1 a2
+intersectItem (Item a ) (Ref  _ ) = Just (Item a)
+intersectItem (Ref  _ ) (Item a ) = Just (Item a)
+intersectItem (Ref  i1) (Ref  i2) | i1 == i2  = Just (Ref i1)
+                                  | otherwise = Just (Ref i1) -- TODO: this is wrong
+
+fixed :: Atom -> StateT (GenState FixedRegex a) [] [Item]
 fixed r =
   do a <- popAtom
      let ma = F.intersectAtom a r
-     maybe mzero (return . (:[])) ma
+     maybe mzero (return . (:[]) . Item) ma
 
 popAtom :: StateT (GenState FixedRegex a) [] Atom
 popAtom =

@@ -22,11 +22,12 @@ mkLabel ''GenState
 emptyState :: s -> GenState s a
 emptyState s = GenState s 1 M.empty
 
-storeGroup :: a -> StateT (GenState s a) [] ()
+storeGroup :: a -> StateT (GenState s a) [] Int
 storeGroup s =
   do g <- gets nextGroup
      modify nextGroup (+1)
      modify groups (M.insert g s)
+     return g
 
 updateGroup :: Int -> a -> StateT (GenState s a) [] ()
 updateGroup g s = modify groups (M.insert g s)

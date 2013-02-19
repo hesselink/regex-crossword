@@ -40,7 +40,7 @@ generate' (Seq r1 r2) =
      return (x ++ y)
 generate' (Group r) =
   do x <- generate' r
-     storeGroup x
+     _ <- storeGroup x
      return x
 generate' (BackRef i) =
   do l <- gets state
