@@ -22,6 +22,7 @@ import Crossword.Token
 
 type Parser = Parsec String ()
 
+-- TODO: seems to ignore invalid input
 regex :: Parser Regex
 regex = choices <$> sepBy1 regex' (char '|')
 
