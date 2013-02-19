@@ -41,7 +41,11 @@ expand' (BackRef i)   =
   do g  <- getGroup i
      as <- replicateM (length g) popAtom
      let mr = F.intersect as g
-     maybe mzero return mr
+     case mr of
+       Nothing -> mzero
+       Just r  ->
+         do updateGroup i r
+            return r
 
 expand' (Choice r1 r2) = expand' r1 `mplus` expand' r2
 expand' (Option r)    = return mempty `mplus` expand' r

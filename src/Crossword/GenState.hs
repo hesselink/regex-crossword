@@ -28,6 +28,9 @@ storeGroup s =
      modify nextGroup (+1)
      modify groups (M.insert g s)
 
+updateGroup :: Int -> a -> StateT (GenState s a) [] ()
+updateGroup g s = modify groups (M.insert g s)
+
 getGroup :: Int -> StateT (GenState s a) [] a
 getGroup g =
   do gs <- gets groups
