@@ -58,8 +58,7 @@ stepClues :: Direction -> Puzzle -> Puzzle
 stepClues dir pzl = foldMapEndo (stepClue dir) (get (label dir) pzl) pzl
 
 stepClue :: Direction -> Clue Regex -> Puzzle -> Puzzle
-stepClue dir c pzl = modify board updateBoard
-                   $ pzl
+stepClue dir c pzl = modify board updateBoard pzl
   where
     updateBoard = foldMapEndo (uncurry (Map.insertWith (\x -> fromJust . intersectAtom x))) $ zip poss newRow
     newRow = merges newOpts

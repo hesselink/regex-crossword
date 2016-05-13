@@ -27,7 +27,7 @@ regex :: Parser Regex
 regex = choices <$> sepBy1 regex' (char '|')
 
 regex' :: Parser Regex
-regex' = seq <$> some (withModifier $
+regex' = seq <$> some (withModifier
    (  literal
   <|> any
   <|> oneOrNone
@@ -37,7 +37,7 @@ regex' = seq <$> some (withModifier $
   )
 
 withModifier :: Parser Regex -> Parser Regex
-withModifier p = p <**> (option id modifier)
+withModifier p = p <**> option id modifier
 
 modifier :: Parser (Regex -> Regex)
 modifier =  Many   <$ char '*'

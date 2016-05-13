@@ -18,7 +18,7 @@ import Crossword.Regex
 import qualified Crossword.FixedRegex as F
 
 expand :: FixedRegex -> Regex -> [FixedRegex]
-expand pat r = filter ((== (length pat)) . length)
+expand pat r = filter ((== length pat) . length)
              . map (uncurry replaceGroups . second (get groups))
              $ runStateT (expand' r) (emptyState pat)
 
