@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 module Crossword.Description where
 
-import Control.Applicative
 import Text.Parsec hiding ((<|>))
 
 import Crossword.Parser (Parser)

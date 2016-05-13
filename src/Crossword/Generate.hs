@@ -3,7 +3,7 @@ module Crossword.Generate where
 
 import Control.Monad.State (StateT (..))
 import Control.Monad
-import Data.Label.PureM
+import Data.Label.Monadic
 import Data.Set ((\\))
 
 import qualified Data.Set    as Set

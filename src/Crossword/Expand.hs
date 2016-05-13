@@ -1,15 +1,14 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Crossword.Expand where
 
-import Control.Applicative
 import Control.Arrow
 import Control.Monad
 import Control.Monad.State (StateT (..))
 import Data.IntMap (IntMap)
 import Data.Label
-import Data.Label.PureM
+import Data.Label.Monadic
 import Data.Maybe
-import Data.Monoid (Monoid (..), (<>))
+import Data.Monoid ((<>))
 
 import qualified Data.IntMap as Map
 

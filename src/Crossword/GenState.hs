@@ -4,7 +4,7 @@ module Crossword.GenState where
 import Control.Monad.State (StateT (..))
 import Data.IntMap (IntMap)
 import Data.Label (mkLabel)
-import Data.Label.PureM
+import Data.Label.Monadic
 import Data.Maybe (maybeToList)
 import Data.Set (Set)
 

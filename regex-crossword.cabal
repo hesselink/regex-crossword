@@ -10,10 +10,10 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  build-depends:       base == 4.5.*
-                     , containers == 0.4.*
-                     , fclabels == 1.1.*
-                     , mtl == 2.1.*
+  build-depends:       base >= 4.5 && < 4.9
+                     , containers >= 0.4 && < 0.6
+                     , fclabels >= 2 && < 2.1
+                     , mtl >= 2.1 && < 2.3
                      , parsec == 3.1.*
   hs-source-dirs:      src
   exposed-modules:     Crossword.Generate
@@ -28,9 +28,9 @@ library
   ghc-options:         -Wall
 
 executable regex-crossword-solver
-  build-depends:       base   == 4.5.*
+  build-depends:       base   >= 4.5 && < 4.9
                      , parsec == 3.1.*
-                     , fclabels == 1.1.*
+                     , fclabels >= 2 && < 2.1
                      , regex-crossword
   hs-source-dirs:      solver
   main-is:             Main.hs
